@@ -90,6 +90,22 @@ class ChromeLinux:
         self.key = kdf.PBKDF2(my_pass, salt, length, iterations)
         self.dbpath = f"/home/{getuser()}/.config/google-chrome/Default/"
 
+        # try flatpak path
+        if not os.path.exists(self.dbpath):
+            self.dbpath = f"/home/{getuser()}/.var/app/com.google.Chrome/config/google-chrome/Default/"
+        if not os.path.exists(self.dbpath):
+            self.dbpath = f"/home/{getuser()}/.local/share/flatpak/app/com.google.Chrome/current/active/files/extra/.config/google-chrome/Default/"
+
+        # try snap path
+        if not os.path.exists(self.dbpath):
+            self.dbpath = f"/home/{getuser()}/snap/google-chrome/common/.config/google-chrome/Default/"
+
+        if not os.path.exists(self.dbpath):
+            raise Exception("Chrome path not found. Please specify manually using -d option")
+        
+        self.dbpath = os.path.abspath(self.dbpath)
+
+
     def decrypt_func(self, enc_passwd):
         """ Linux Decryption Function """
         aes = import_module('Crypto.Cipher.AES')
@@ -122,7 +138,7 @@ class Chrome:
             :param prettyprint: if true, print clear text password to screen
             :return: clear text data in dictionary format
         """
-        copy(self.chrome_os.dbpath + "Login Data", "Login Data.db")
+        copy(os.path.join(self.chrome_os.dbpath, "Login Data"), "Login Data.db")
         conn = sqlite3.connect("Login Data.db")
         cursor = conn.cursor()
         cursor.execute("""
