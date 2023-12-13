@@ -142,15 +142,25 @@ class Chrome:
         unlink("Login Data.db")
 
         if prettyprint:
-            return json.dumps(data, indent=4)
+            return json.dumps(data, indent=2)
         return data
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--directory', help='Chrome directory path', default=None, type=str)
+
+    args = parser.parse_args()
+
     """ Operational Script """
     chrome_pwd = Chrome()
+    if args.directory:
+        chrome_pwd.chrome_os.dbpath = args.directory
+
     print(chrome_pwd.get_login_db)
-    chrome_pwd.get_password(prettyprint=True)
+    print(chrome_pwd.get_password(prettyprint=True))
 
 
 if __name__ == '__main__':
